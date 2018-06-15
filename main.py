@@ -17,6 +17,7 @@ iv = crypto.getrandbits(128) # hardware generated random IV (never reuse it)
 gc.enable()
 wdt = WDT(timeout=4000000)
 adc = machine.ADC()
+dac=machine.DAC('P21')
 
 # Turn off WiFi to save power
 w = WLAN()
@@ -26,6 +27,7 @@ chrono = Timer.Chrono()
 chrono.start()
 
 volt = adc.channel(pin='P20')
+dac.write(1)
 
 pycom.heartbeat(False)
 pycom.rgbled(0x007f00) # Turn on Green LED
@@ -138,7 +140,12 @@ sl = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
 LoRaSend('{"val":'+str(getPressure())+',"volt":'+str(getVoltage())+',"msgID":'+str(lora.stats()[8])+'}')
 print('Send: {"val":'+str(getPressure())+',"volt":'+str(getVoltage())+',"msgID":'+str(lora.stats()[8])+'}')
 lora = LoRa(mode=LoRa.LORA, region=LoRa.AU915, power_mode=LoRa.SLEEP)
-print(getPressure())
+
+dac.write(0)
+dac.deinit()
+utime.sleep_ms(100)
+
 print('Sleeping')
 wdt.feed()
-#machine.deepsleep(3600000)
+machine.deepsleep(3600000)
+
